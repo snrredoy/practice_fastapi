@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
+from typing import Annotated
 
 app = FastAPI()
 
@@ -91,3 +92,9 @@ async def update_product(product_id: int, product: Product, q: str | None = None
     }
 
 
+@app.get('/cards/')
+async def read_card(q: Annotated[str | None , Query(max_length=50)] = None):
+    results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
