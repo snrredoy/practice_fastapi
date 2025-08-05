@@ -53,3 +53,13 @@ async def read_items(item_id: int , user_id: int, q: str | None = None, short: b
     if not short:
         item.update({'description': 'This is an amezing item that has a long description.'})
     return item
+
+
+@app.get('/required/{item_id}/user/{user_id}')
+async def read_items(item_id: int , user_id: int, needy: str, q: str | None = None, short: bool = False):
+    item = {'item_id': item_id, 'user_id': user_id, 'needy': needy}
+    if q:
+        item.update({'q': q})
+    if not short:
+        item.update({'description': 'This is an amezing item that has a long description.'})
+    return item
