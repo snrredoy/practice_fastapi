@@ -91,7 +91,7 @@ async def update_product(product_id: int, product: Product, q: str | None = None
         'q': q
     }
 
-# not required using annotate and query , q can be none
+# not required using annotate and query , q can be none or str
 # @app.get('/cards/')
 # async def read_card(q: Annotated[str | None , Query(max_length=50)] = None):
 #     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
@@ -99,7 +99,7 @@ async def update_product(product_id: int, product: Product, q: str | None = None
 #         results.update({"q": q})
 #     return results
 
-# default value with non required, q is default
+# default value with non required, q is default str
 # @app.get('/cards/')
 # async def read_card(q: Annotated[str, Query(max_length=50)] = 'Name'):
 #     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
@@ -108,7 +108,7 @@ async def update_product(product_id: int, product: Product, q: str | None = None
 #     return results
 
 
-# required query parameter, q must be input
+# required query parameter, q must be str input
 # @app.get('/cards/')
 # async def read_card(q: Annotated[str, Query(max_length=50)]):
 #     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
@@ -117,9 +117,54 @@ async def update_product(product_id: int, product: Product, q: str | None = None
 #     return results
 
 
-# required query parameter but q accept none
+# required query parameter but q accept str or none
+# @app.get('/cards/')
+# async def read_card(q: Annotated[str | None, Query(max_length=50)]):
+#     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+
+# non required query parameter but q accept list or none
+# @app.get('/cards/')
+# async def read_card(q: Annotated[list[str] | None, Query(max_length=50)] = None):
+#     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+
+# non required query parameter but q accept list or default
+# @app.get('/cards/')
+# async def read_card(q: Annotated[list[str], Query(max_length=50)] = ['list', 'dict']):
+#     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+
+# non required query parameter but q accept list or default(You can also use list directly instead of list[str])
+# @app.get('/cards/')
+# async def read_card(q: Annotated[list, Query(max_length=50)] = []):
+#     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+
+# non required query parameter but q accept str or None
+# @app.get('/cards/')
+# async def read_card(q: Annotated[str | None, Query(title='Query String', description='This is query', max_length=50)] = None):
+#     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+#     if q:
+#         results.update({"q": q})
+#     return results
+
+
+# non required query parameter but item-query accept str or None with deprecated
 @app.get('/cards/')
-async def read_card(q: Annotated[str | None, Query(max_length=50)]):
+async def read_card(q: Annotated[str | None, Query(alias='item-query', deprecated=True)] = None):
     results = {"cards": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
     if q:
         results.update({"q": q})
