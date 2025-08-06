@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from pydantic import BaseModel, AfterValidator
 from typing import Annotated
 import random
@@ -192,3 +192,21 @@ async def read_val(id: Annotated[str | None, AfterValidator(check_valid_id)] = N
     else:
         id, item = random.choice(list(data.items()))
     return {'id': id, 'name': item}
+
+
+# Validate path parameter
+# @app.get('/roll/{role_id}')
+# async def read_roll(role_id: Annotated[int , Path(title='Put the valid roll')]):
+#     item = {}
+#     if role_id:
+#         item.update({'role': role_id})
+#     return item
+
+
+# Validate path parameter
+@app.get('/roll/{role_id}')
+async def read_roll(role_id: Annotated[int , Path(title='Put the valid roll', ge=1)]):
+    item = {}
+    if role_id:
+        item.update({'role': role_id})
+    return item
