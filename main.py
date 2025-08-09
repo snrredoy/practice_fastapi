@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Query, Path
-from pydantic import BaseModel, AfterValidator
-from typing import Annotated
+from fastapi import FastAPI, Query, Path, Body
+from pydantic import BaseModel, AfterValidator, Field
+from typing import Annotated, Literal
 import random
 
 
@@ -76,6 +76,10 @@ class Product(BaseModel):
     tax: float | None = None
 
 
+class User(BaseModel):
+    username: str | None = None
+    full_name: str | None = None
+
 @app.post('/product/')
 async def create_product(item: Product):
     item_dict = item.dict()
@@ -93,6 +97,50 @@ async def update_product(product_id: int, product: Product, q: str | None = None
         'q': q
     }
 
+
+# path , query and body using one request and body is optional
+@app.put('/update/{product_id}')
+async def update_product(product_id: Annotated[int, Path(ge=0, le=100)], q: str | None = None, product: Product | None = None):
+    results = {
+        'product_id': product_id
+    }
+    if q:
+        results.update({'q': q})
+    if product:
+        results.update({'product': product})
+    return results
+
+
+# path , query and multiple body using one request
+@app.post('/add/{product_id}')
+async def update_product(product_id: Annotated[int, Path(ge=0, le=100)], user: User, q: str | None = None, product: Product | None = None):
+    results = {
+        'product_id': product_id
+    }
+    if q:
+        results.update({'q': q})
+    if product:
+        results.update({'product': product})
+    if user:
+        results.update({'user': user})
+    return results
+
+
+# singular body item and multiple body using one request
+@app.post('/singular/{product_id}')
+async def update_product(product_id: Annotated[int, Path(ge=0, le=100)], user: User,  importance: Annotated[int, Body()], q: str | None = None, product: Product | None = None):
+    results = {
+        'product_id': product_id
+    }
+    if q:
+        results.update({'q': q})
+    if product:
+        results.update({'product': product})
+    if user:
+        results.update({'user': user})
+    if importance:
+        results.update({'importance': importance})
+    return results
 # not required using annotate and query , q can be none or str
 # @app.get('/cards/')
 # async def read_card(q: Annotated[str | None , Query(max_length=50)] = None):
@@ -210,3 +258,17 @@ async def read_roll(role_id: Annotated[int , Path(title='Put the valid roll', ge
     if role_id:
         item.update({'role': role_id})
     return item
+
+
+class FilterParams(BaseModel):
+    model_config = {"extra": "forbid"}
+
+    limit: int = Field(100, ge=0, le=100)
+    offset: int = Field(0, ge=0)
+    order_by: Literal['created_at', 'updated_at'] = 'created_at'
+    tags: list[str] = []
+
+
+@app.get('/filter/')
+async def read_filter(filter: Annotated[FilterParams, Query()]):
+    return filter
