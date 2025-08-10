@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Query, Path, Body
-from pydantic import BaseModel, AfterValidator, Field
+from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from typing import Annotated, Literal
 import random
 
@@ -269,6 +269,46 @@ class FilterParams(BaseModel):
     tags: list[str] = []
 
 
-@app.get('/filter/')
+@app.get('/filter/', tags=['Filter with all model fields'])
 async def read_filter(filter: Annotated[FilterParams, Query()]):
     return filter
+
+
+class Images(BaseModel):
+    url: HttpUrl
+    name: str
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tags: list[str]
+    images: list[Images] | None = None
+
+class Offer(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    items: list[Item] | None = None
+
+
+@app.put('/update_item/{item_id}')
+async def update_item(item_id: int, item: Item):
+    results = {
+        'item_id': item_id,
+        'item': item
+    }
+    return results
+
+
+@app.post('/offers/')
+async def create_offer(offer: Offer):
+    results = {
+        'offer': offer
+    }
+    return results
+
+
+@app.post("/index-weights/")
+async def create_index_weights(weights: dict[int, float]):
+    return weights
