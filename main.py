@@ -312,3 +312,41 @@ async def create_offer(offer: Offer):
 @app.post("/index-weights/")
 async def create_index_weights(weights: dict[int, float]):
     return weights
+
+
+class Item1(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+
+    model_config = {
+        'json_schema_extra':{
+            'examples': [
+                {
+                    "name": "Foo",
+                    "description": "A very nice Item",
+                    "price": 35.4,
+                    "tax": 3.2,
+                }
+            ]
+        }
+    }
+
+@app.put('/item1/{item_id}')
+async def update_item1(item_id: int, item: Item1):
+    results = {'item_id': item_id, 'item': item}
+    return results
+
+
+class Item2(BaseModel):
+    name: str = Field(examples=['Foo'])
+    description: str = Field(default=None, examples=['A very nice Item'])
+    price: float = Field(examples=[30.6])
+    tax: float = Field(default=None, examples=[12.2])
+
+
+@app.put('/item2/{item_id}')
+async def update_item1(item_id: int, item: Item2):
+    results = {'item_id': item_id, 'item': item}
+    return results
