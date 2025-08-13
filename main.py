@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Path, Body
+from fastapi import FastAPI, Query, Path, Body, Cookie, Response
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl
 from typing import Annotated, Literal
 import random
@@ -373,3 +373,12 @@ async def read_items(
         "start_process": start_process,
         "duration": duration,
     }
+
+@app.get("/set-cookie")
+async def set_cookie(response: Response):
+    response.set_cookie(key="ads_id", value="12345")
+    return {"message": "Cookie set!"}
+
+@app.get("/items_cookie/")
+async def read_items(ads_id: Annotated[str | None, Cookie()] = None):
+    return {"ads_id": ads_id}
