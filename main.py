@@ -386,3 +386,8 @@ async def read_items(ads_id: Annotated[str | None, Cookie()] = None):
 @app.get('/item_header/')
 async def read_items(user_agent: Annotated[str | None, Header()] = None):
     return {'User agent': user_agent}
+
+
+@app.get("/items_duplicate/")
+async def read_items(x_token: Annotated[list[str] | None, Header()] = None):
+    return {"X-Token values": x_token}
