@@ -391,3 +391,15 @@ async def read_items(user_agent: Annotated[str | None, Header()] = None):
 @app.get("/items_duplicate/")
 async def read_items(x_token: Annotated[list[str] | None, Header()] = None):
     return {"X-Token values": x_token}
+
+
+@app.post('/item_return')
+async def create_item(item: Item) -> Item:
+    return item
+
+@app.get('/item_return_get')
+async def read_item() -> list[Item]:
+    return [
+        Item(name='Alu', description='I am a good alu', price= 20, tags=['alu', 'sei sobji']),
+        Item(name='Potol', description='Ami holam bici ala potol', price= 40, tags=['potol', 'bici ala potol'])
+    ]
