@@ -447,3 +447,9 @@ async def get_portal(teleport: bool = False) -> Response:
     if teleport:
         return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
     return JSONResponse(content={"message": "Here's your interdimensional portal."})
+
+
+
+@app.get("/teleport")
+async def get_teleport() -> RedirectResponse:
+    return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
