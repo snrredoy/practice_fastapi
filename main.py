@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header
-from pydantic import BaseModel, AfterValidator, Field, HttpUrl
-from typing import Annotated, Literal
+from pydantic import BaseModel, AfterValidator, Field, HttpUrl, EmailStr
+from typing import Annotated, Literal, Any
 import random
 from datetime import datetime, timedelta, time
 from uuid import UUID
+from fastapi.responses import JSONResponse, RedirectResponse
 
 app = FastAPI()
 
@@ -403,3 +404,46 @@ async def read_item() -> list[Item]:
         Item(name='Alu', description='I am a good alu', price= 20, tags=['alu', 'sei sobji']),
         Item(name='Potol', description='Ami holam bici ala potol', price= 40, tags=['potol', 'bici ala potol'])
     ]
+
+
+class BaseUser(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: str | None = None
+
+class UserIn(BaseModel):
+    password: str
+
+# class UserIn(BaseModel):
+#     username: str
+#     password: str
+#     email: EmailStr
+#     full_name: str | None = None
+
+class UserOut(BaseUser):
+    username: str
+    email: EmailStr
+    full_name: str | None = None
+
+
+
+# @app.post('/create_user/')
+# async def create_user(user: UserIn) -> UserIn:
+#     return user
+
+
+# @app.post('/create_user/', response_model=UserOut)
+# async def create_user(user: UserIn) -> Any:
+#     return user
+
+
+@app.post('/create_user/')
+async def create_user(user: UserIn) -> BaseUser:
+    return user
+
+
+@app.get("/portal")
+async def get_portal(teleport: bool = False) -> Response:
+    if teleport:
+        return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    return JSONResponse(content={"message": "Here's your interdimensional portal."})
