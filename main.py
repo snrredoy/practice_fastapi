@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header
+from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl, EmailStr
 from typing import Annotated, Literal, Any, Union
 import random
@@ -521,3 +521,8 @@ items = {
 @app.get("/bitems/{item_id}", response_model=Union[PlaneItem, CarItem])
 async def read_item(item_id: str):
     return items[item_id]
+
+
+@app.post('/login')
+async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    return {"username": username}
