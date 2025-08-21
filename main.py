@@ -523,6 +523,16 @@ async def read_item(item_id: str):
     return items[item_id]
 
 
-@app.post('/login')
-async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
-    return {"username": username}
+# @app.post('/login')
+# async def login(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+#     return {"username": username}
+
+
+class FormData(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/login/")
+async def login(data: Annotated[FormData, Form()]):
+    return data
