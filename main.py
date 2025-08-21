@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl, EmailStr
-from typing import Annotated, Literal, Any
+from typing import Annotated, Literal, Any, Union
 import random
 from datetime import datetime, timedelta, time
 from uuid import UUID
@@ -491,4 +491,33 @@ async def read_item_name(item_id: str):
 
 @app.get("/item4/{item_id}/public", response_model=Item4, response_model_exclude={"tax"})
 async def read_item_public_data(item_id: str):
+    return items[item_id]
+
+
+class BaseItem(BaseModel):
+    description: str
+    type: str
+
+
+class CarItem(BaseItem):
+    type: str = "car"
+
+
+class PlaneItem(BaseItem):
+    type: str = "plane"
+    size: int
+
+
+items = {
+    "item1": {"description": "All my friends drive a low rider", "type": "car"},
+    "item2": {
+        "description": "Music is my aeroplane, it's my aeroplane",
+        "type": "plane",
+        "size": 5,
+    },
+}
+
+
+@app.get("/bitems/{item_id}", response_model=Union[PlaneItem, CarItem])
+async def read_item(item_id: str):
     return items[item_id]
