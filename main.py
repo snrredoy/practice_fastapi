@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form, File, UploadFile
+from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form, File, UploadFile, HTTPException
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl, EmailStr
 from typing import Annotated, Literal, Any, Union
 import random
@@ -588,4 +588,14 @@ async def create_file(
         "file_size": len(file),
         "token": token,
         "fileb_content_type": fileb.content_type,
+    }
+
+
+items = {"foo": "The Foo Wrestlers"}
+@app.get('/httpexeptionitem/{item_id}')
+async def read_item(item_id: str):
+    if item_id not in items:
+        raise HTTPException(status_code=404, detail="Item not found.")
+    return {
+        'item': items[item_id]
     }
