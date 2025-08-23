@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form
+from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form, File, UploadFile
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl, EmailStr
 from typing import Annotated, Literal, Any, Union
 import random
@@ -271,9 +271,9 @@ class FilterParams(BaseModel):
     tags: list[str] = []
 
 
-@app.get('/filter/', tags=['Filter with all model fields'])
-async def read_filter(filter: Annotated[FilterParams, Query()]):
-    return filter
+# @app.get('/filter/', tags=['Filter with all model fields'])
+# async def read_filter(filter: Annotated[FilterParams, Query()]):
+#     return filter
 
 
 class Images(BaseModel):
@@ -536,3 +536,16 @@ class FormData(BaseModel):
 @app.post("/login/")
 async def login(data: Annotated[FormData, Form()]):
     return data
+
+
+# files
+@app.post('/files/')
+async def create_file(file: Annotated[bytes, File()]):
+    return {'file size': len(file)}
+
+# upload files
+@app.post('/uploadfiles/')
+async def create_upload_file(file: UploadFile):
+    return {'file name': file}
+
+
