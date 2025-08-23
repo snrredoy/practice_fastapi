@@ -4,7 +4,7 @@ from typing import Annotated, Literal, Any, Union
 import random
 from datetime import datetime, timedelta, time
 from uuid import UUID
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 
 app = FastAPI()
 
@@ -549,3 +549,29 @@ async def create_upload_file(file: UploadFile):
     return {'file name': file}
 
 
+
+@app.post("/multiplefiles/")
+async def create_files(files: Annotated[list[bytes], File()]):
+    return {"file_sizes": [len(file) for file in files]}
+
+
+@app.post("/multipleuploadfiles/")
+async def create_upload_files(files: list[UploadFile]):
+    return {"filenames": [file.filename for file in files]}
+
+
+@app.get("/")
+async def main():
+    content = """
+<body>
+<form action="/files/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+<form action="/uploadfiles/" enctype="multipart/form-data" method="post">
+<input name="files" type="file" multiple>
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
