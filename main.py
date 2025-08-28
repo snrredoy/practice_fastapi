@@ -296,8 +296,17 @@ class Offer(BaseModel):
     items: list[Item] | None = None
 
 
-@app.put('/update_item/{item_id}')
+@app.put('/update_item/{item_id}', response_description="The created item", summary="Update item",)
 async def update_item(item_id: int, item: Item):
+    """
+        Create an item with all the information:
+
+        - **name**: each item must have a name
+        - **description**: a long description
+        - **price**: required
+        - **tax**: if the item doesn't have tax, you can omit this
+        - **tags**: a set of unique tag strings for this item
+    """
     results = {
         'item_id': item_id,
         'item': item
