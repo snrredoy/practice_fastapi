@@ -7,6 +7,7 @@ from uuid import UUID
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse, PlainTextResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 
@@ -490,6 +491,11 @@ items = {
 async def read_item(item_id: str):
     return items[item_id]
 
+@app.put("/items4/{item_id}", response_model=Item4)
+async def update_item(item_id: str, item: Item4):
+    update_item_encoded = jsonable_encoder(item)
+    items[item_id] = update_item_encoded
+    return update_item_encoded
 
 @app.get(
     "/item4/{item_id}/name",
