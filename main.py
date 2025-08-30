@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form, File, UploadFile, HTTPException,Request
+from fastapi import FastAPI, Query, Path, Body, Cookie, Response, Header, Form, File, UploadFile, HTTPException,Request, Depends
 from pydantic import BaseModel, AfterValidator, Field, HttpUrl, EmailStr
 from typing import Annotated, Literal, Any, Union
 import random
@@ -692,3 +692,17 @@ async def read_item(item_id: int):
     if item_id == 3:
         raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
     return {"item_id": item_id}
+
+
+async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
+    return {"q": q, "skip": skip, "limit": limit}
+
+
+@app.get("/itemsss/")
+async def read_items(commons: Annotated[dict, Depends(common_parameters)]):
+    return commons
+
+
+@app.get("/users/")
+async def read_users(commons: Annotated[dict, Depends(common_parameters)]):
+    return commons
