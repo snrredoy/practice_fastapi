@@ -694,7 +694,7 @@ async def read_item(item_id: int):
         raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
     return {"item_id": item_id}
 
-
+# Create a dependency, or "dependable"
 async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
     return {"q": q, "skip": skip, "limit": limit}
 
@@ -708,7 +708,7 @@ async def read_items(commons: Annotated[dict, Depends(common_parameters)]):
 async def read_users(commons: Annotated[dict, Depends(common_parameters)]):
     return commons
 
-
+# Classes as dependencies
 fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
 
 
@@ -728,7 +728,7 @@ async def read_items(commons: Annotated[CommonQueryParams, Depends(CommonQueryPa
     response.update({"items": items})
     return response
 
-
+# First dependency "dependable"
 def query_extractor(q: str | None = None):
     return q
 
@@ -747,3 +747,20 @@ async def read_query(
     query_or_default: Annotated[str, Depends(query_or_cookie_extractor)],
 ):
     return {"q_or_cookie": query_or_default}
+
+
+# list of dependencies
+async def verify_token(x_token: Annotated[str, Header()]):
+    if x_token != "fake-super-secret-token":
+        raise HTTPException(status_code=400, detail="X-Token header invalid")
+
+
+async def verify_key(x_key: Annotated[str, Header()]):
+    if x_key != "fake-super-secret-key":
+        raise HTTPException(status_code=400, detail="X-Key header invalid")
+    return x_key
+
+
+@app.get("/list-of-depe-items/", dependencies=[Depends(verify_token), Depends(verify_key)])
+async def read_items():
+    return [{"item": "Foo"}, {"item": "Bar"}]
