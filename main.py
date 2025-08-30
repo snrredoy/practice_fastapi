@@ -475,27 +475,55 @@ async def read_portal(teleport: bool = False) -> Response | dict:
 
 
 class Item4(BaseModel):
-    name: str
+    name: str | None = None
     description: str | None = None
     price: float
     tax: float = 10.5
     tags: list[str] = []
 
-items = {
-    "foo": {"name": "Foo", "price": 50.2},
-    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+# items = {
+#     "foo": {"name": "Foo", "price": 50.2},
+#     "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+#     "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+# }
+itemss = {
+    "foo": {"name": "Foo", "price": 50.2, "tax": 10.5, "tags": []},
+    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2, "tags": []},
     "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
 }
 
+# @app.get('/item4/{item_id}', response_model=Item4, response_model_exclude_unset=True)
+# async def read_item(item_id: str):
+#     return items[item_id]
+
 @app.get('/item4/{item_id}', response_model=Item4, response_model_exclude_unset=True)
 async def read_item(item_id: str):
-    return items[item_id]
+    if item_id not in itemss:
+        raise HTTPException(status_code=404, detail=f"Item '{item_id}' not found")
+    return itemss[item_id]
 
-@app.put("/items4/{item_id}", response_model=Item4)
-async def update_item(item_id: str, item: Item4):
-    update_item_encoded = jsonable_encoder(item)
-    items[item_id] = update_item_encoded
-    return update_item_encoded
+
+# @app.put("/items4/{item_id}", response_model=Item4)
+# async def update_item(item_id: str, item: Item4):
+#     update_item_encoded = jsonable_encoder(item)
+#     items[item_id] = update_item_encoded
+#     return update_item_encoded
+
+
+@app.patch("/items4/{item_id}", response_model=Item4)
+async def patch_item(item_id: str, item: Item4):
+    stored_item_data = itemss[item_id]
+
+    if not isinstance(stored_item_data, dict):
+        raise TypeError(f"Corrupted data in items[{item_id}]. Expected dict, got {stored_item_data}")
+
+    stored_item_model = Item4(**stored_item_data)
+    update_data = item.model_dump(exclude_unset=True)
+    updated_item = stored_item_model.copy(update=update_data)
+
+    itemss[item_id] = updated_item.model_dump()
+    return updated_item
+
 
 @app.get(
     "/item4/{item_id}/name",
