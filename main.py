@@ -825,3 +825,28 @@ async def dependency_c(dep_b: Annotated[DepB, Depends(dependency_b)]):
         yield dep_c
     finally:
         dep_c.close(dep_b)
+
+# Always raise in Dependencies with yield and except
+class InternalError(Exception):
+    pass
+
+
+def get_username():
+    try:
+        yield "Rick"
+    except InternalError:
+        print("We don't swallow the internal error here, we raise again 😎")
+        raise
+
+
+@app.get("/raise-items/{item_id}")
+def get_item(item_id: str, username: Annotated[str, Depends(get_username)]):
+    if item_id == "portal-gun":
+        raise InternalError(
+            f"The portal gun is too dangerous to be owned by {username}"
+        )
+    if item_id != "plumbus":
+        raise HTTPException(
+            status_code=404, detail="Item not found, there's only a plumbus here"
+        )
+    return item_id
