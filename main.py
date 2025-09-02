@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse, Plai
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import OAuth2PasswordBearer
 
 app = FastAPI()
 
@@ -850,3 +851,33 @@ def get_item(item_id: str, username: Annotated[str, Depends(get_username)]):
             status_code=404, detail="Item not found, there's only a plumbus here"
         )
     return item_id
+
+
+# FastAPI's OAuth2PasswordBearer¶
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+@app.get("/oauth2-items/")
+async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token}
+
+
+# Get current user
+class UserModel(BaseModel):
+    username: str
+    email: str | None = None
+    full_name: str | None = None
+    disable: bool | None = None
+
+def fake_decode_token(token):
+    return User(
+        username=token + "fakedecoded", email="john@example.com", full_name="John Doe"
+    )
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    user = fake_decode_token(token)
+    return user
+
+@app.get("/users/current")
+async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
+    return current_user
