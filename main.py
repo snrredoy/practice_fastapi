@@ -1120,40 +1120,106 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from sqlmodel import SQLModel, Field, create_engine, Session
+from sqlmodel import SQLModel, Field, create_engine, Session, select
+
+# class Hero(SQLModel, table=True):
+#     id: int | None = Field(primary_key=True, default=None)
+#     name: str
+#     secret_name: str 
+#     age: int | None = None
+
+# sqlite_file_name = "database.db"
+# sqlite_url = f"sqlite:///{sqlite_file_name}"
+# connect_args = {"check_same_thread": False}
+# engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
+
+# def create_db_and_tables():
+#     SQLModel.metadata.create_all(engine)
+
+# def create_heroes():  
+#     hero_1 = Hero(name="Deadpond", secret_name="Dive Wilson")  
+#     hero_2 = Hero(name="Spider-Boy", secret_name="Pedro Parqueador")
+#     hero_3 = Hero(name="Rusty-Man", secret_name="Tommy Sharp", age=48)
+
+#     with Session(engine) as session:  
+#         session.add(hero_1)  
+#         session.add(hero_2)
+#         session.add(hero_3)
+
+#         session.commit()  
+    
+
+
+# def main():  
+#     create_db_and_tables()  
+#     create_heroes()  
+
+
+# if __name__ == "__main__":  
+#     main()  
+
 
 class Hero(SQLModel, table=True):
-    id: int | None = Field(primary_key=True, default=None)
-    name: str
-    secret_name: str 
-    age: int | None = None
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True)
+    age: int | None = Field(default=None, index=True)
+    secret_name: str
+
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
-engine = create_engine(sqlite_url, echo=True)
+connect_args = {"check_same_thread": False}
+engine = create_engine(sqlite_url, connect_args=connect_args)
+
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
-def create_heroes():  
-    hero_1 = Hero(name="Deadpond", secret_name="Dive Wilson")  
-    hero_2 = Hero(name="Spider-Boy", secret_name="Pedro Parqueador")
-    hero_3 = Hero(name="Rusty-Man", secret_name="Tommy Sharp", age=48)
 
-    with Session(engine) as session:  
-        session.add(hero_1)  
-        session.add(hero_2)
-        session.add(hero_3)
-
-        session.commit()  
-    
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 
-def main():  
-    create_db_and_tables()  
-    create_heroes()  
+SessionDep = Annotated[Session, Depends(get_session)]
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
 
 
-if __name__ == "__main__":  
-    main()  
+@app.post("/heroes/")
+def create_hero(hero: Hero, session: SessionDep) -> Hero:
+    session.add(hero)
+    session.commit()
+    session.refresh(hero)
+    return hero
+
+
+@app.get("/heroes/")
+def read_heroes(
+    session: SessionDep,
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+) -> list[Hero]:
+    heroes = session.exec(select(Hero).offset(offset).limit(limit)).all()
+    return heroes
+
+
+@app.get("/heroes/{hero_id}")
+def read_hero(hero_id: int, session: SessionDep) -> Hero:
+    hero = session.get(Hero, hero_id)
+    if not hero:
+        raise HTTPException(status_code=404, detail="Hero not found")
+    return hero
+
+
+@app.delete("/heroes/{hero_id}")
+def delete_hero(hero_id: int, session: SessionDep):
+    hero = session.get(Hero, hero_id)
+    if not hero:
+        raise HTTPException(status_code=404, detail="Hero not found")
+    session.delete(hero)
+    session.commit()
+    return {"ok": True}
