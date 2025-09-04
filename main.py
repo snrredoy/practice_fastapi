@@ -10,6 +10,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 description = """
 ChimichangApp API helps you do awesome stuff. 🚀
@@ -66,6 +67,8 @@ app = FastAPI(
     docs_url="/documentation",
     redoc_url=None
 )
+
+app.mount('/static', StaticFiles(directory='static'), name='static')
 
 @app.get('/')
 async def root():
