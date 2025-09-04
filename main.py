@@ -11,6 +11,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.testclient import TestClient
 
 description = """
 ChimichangApp API helps you do awesome stuff. 🚀
@@ -73,6 +74,13 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 @app.get('/')
 async def root():
     return {'message': 'Hello FastAPI.'}
+
+client = TestClient(app)
+
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {'msg': 'Hello from test'}
 
 
 @app.get('/item/{item_id}')
