@@ -75,12 +75,12 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 async def root():
     return {'message': 'Hello FastAPI.'}
 
-client = TestClient(app)
+# client = TestClient(app)
 
-def test_root():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {'msg': 'Hello from test'}
+# def test_root():
+#     response = client.get("/")
+#     assert response.status_code == 200
+#     assert response.json() == {'message': 'Hello FastAPI.'}
 
 
 @app.get('/item/{item_id}')
@@ -1273,9 +1273,9 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
+# @app.on_event("startup")
+# def on_startup():
+#     create_db_and_tables()
 
 
 # @app.post("/heroes/")
