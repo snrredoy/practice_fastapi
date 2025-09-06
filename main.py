@@ -12,6 +12,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.testclient import TestClient
+import uvicorn
 
 description = """
 ChimichangApp API helps you do awesome stuff. 🚀
@@ -1373,3 +1374,14 @@ def write_notification(email: str, message=""):
 async def send_notification(email: str, background_tasks: BackgroundTasks):
     background_tasks.add_task(write_notification, email, message="some notification")
     return {"message": "Notification sent in the background"}
+
+
+
+@app.get('/debug')
+async def debug():
+    a = "a"
+    b = "b" + a
+    return {"hello world": b}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
